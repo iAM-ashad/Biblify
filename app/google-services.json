@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23515908678",
+    "project_id": "biblify-6cff7",
+    "storage_bucket": "biblify-6cff7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23515908678:android:d5cdec9466e449e17ed847",
+        "android_client_info": {
+          "package_name": "com.example.biblify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASWjiRn63qyO3ON9_S6m9nkjlxOKgDh0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
