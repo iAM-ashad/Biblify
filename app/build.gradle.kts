@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     // Dagger-hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.ui.text.google.fonts)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.fragment)
     implementation(libs.androidx.hilt.navigation)
@@ -97,6 +98,9 @@ dependencies {
 
     // Json Converter
     implementation (libs.retrofit2.converter.gson)
+
+    // Animations
+    implementation (libs.androidx.animation)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
