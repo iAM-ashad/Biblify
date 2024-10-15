@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.biblify.R
 import com.example.biblify.navigation.BiblifyScreens
-import com.example.biblify.utils.CustomFonts
+import com.example.biblify.utils.customFonts
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -99,7 +99,7 @@ fun SplashScreen(navController: NavController) {
                 )
                 Text(
                     text = stringResource(id = R.string.app_name),
-                    fontFamily = CustomFonts(GoogleFont("Satisfy")),
+                    fontFamily = customFonts(GoogleFont("Satisfy")),
                     style = textStyle,
                     fontSize = 60.sp,
                     fontWeight = FontWeight.Bold,

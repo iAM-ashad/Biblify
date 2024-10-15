@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.biblify.R
 import com.example.biblify.navigation.BiblifyScreens
-import com.example.biblify.utils.CustomFonts
+import com.example.biblify.utils.customFonts
 
 @Composable
 fun CreateAccountScreen(navController: NavController) {
@@ -57,7 +57,7 @@ fun CreateAccountScreen(navController: NavController) {
         Text(
             text = stringResource(id = R.string.app_name),
             fontSize = 80.sp,
-            fontFamily = CustomFonts(GoogleFont("Great Vibes")),
+            fontFamily = customFonts(GoogleFont("Great Vibes")),
             color = Color(240,205,156),
             modifier = Modifier
                 .padding(5.dp)
