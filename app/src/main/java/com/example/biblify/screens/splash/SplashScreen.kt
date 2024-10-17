@@ -28,9 +28,12 @@ import androidx.compose.ui.text.lerp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.biblify.BiblifyApplication_GeneratedInjector
 import com.example.biblify.R
 import com.example.biblify.navigation.BiblifyScreens
 import com.example.biblify.utils.customFonts
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -116,7 +119,12 @@ fun SplashScreen(navController: NavController) {
                        }
                     }
                     delay(2000L)
-                    navController.navigate(BiblifyScreens.LoginScreen.name)
+                    if (FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()) {
+                        navController.navigate(BiblifyScreens.LoginScreen.name)
+                    } else {
+                        navController.navigate(BiblifyScreens.HomeScreen.name)
+                    }
+
                 }
             }
         }

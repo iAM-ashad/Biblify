@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.biblify.R
 import com.example.biblify.navigation.BiblifyScreens
@@ -25,7 +26,10 @@ import com.example.biblify.screens.register.UsersForm
 import com.example.biblify.utils.customFonts
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
 
     Column (
         verticalArrangement = Arrangement.Center,
@@ -42,7 +46,9 @@ fun LoginScreen(navController: NavController) {
                 .padding(5.dp)
         )
         UsersForm("Login") {email, password ->
-            Log.d("TAG", "$password, $email")
+            viewModel.signInWithEmailPassword(email, password) {
+                navController.navigate(BiblifyScreens.HomeScreen.name)
+            }
         }
         Row (
             horizontalArrangement = Arrangement.Center,
