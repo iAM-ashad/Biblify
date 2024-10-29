@@ -1,40 +1,29 @@
 package com.example.biblify.screens.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.biblify.R
 import com.example.biblify.component.BiblifyFAB
 import com.example.biblify.component.BiblifyTopBar
 import com.example.biblify.component.BookListArea
-import com.example.biblify.component.ListCard
 import com.example.biblify.component.TitleSection
 import com.example.biblify.model.BiblifyBooks
 import com.example.biblify.navigation.BiblifyScreens
@@ -44,13 +33,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen (
+    navController: NavController,
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
     Scaffold (
         topBar = {
             BiblifyTopBar(
                 title = stringResource(R.string.app_name),
                 navController = navController,
-                actionIcon = painterResource(R.drawable.logout),
+                actionIcon = painterResource(R.drawable.logout__2_),
                 actionOnClick = {
                     Firebase.auth.signOut().run {
                         navController.navigate(BiblifyScreens.LoginScreen.name)
@@ -60,7 +52,7 @@ fun HomeScreen(navController: NavController) {
             )
         },
         floatingActionButton = {
-            BiblifyFAB () {
+            BiblifyFAB {
                 navController.navigate(BiblifyScreens.SearchScreen.name)
             }
         }
@@ -68,7 +60,8 @@ fun HomeScreen(navController: NavController) {
         Box(modifier = Modifier.padding(contentPadding)) {
             HomeContent(
                 modifier = Modifier.fillMaxSize(),
-                navController = navController
+                navController,
+                viewModel
             )
         }
     }
@@ -77,76 +70,53 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun HomeContent(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: HomeScreenViewModel
 ) {
-    val listOfBooks = listOf(
-        BiblifyBooks(id = "1", title = "Winners are NEVER Quitters", author = "Ashad Ansari"),
-        BiblifyBooks(id = "2", title = "Proudly Gay", author = "Ayush Raj"),
-        BiblifyBooks(id = "3", title = "Why Veg is better: 100 Lies", author = "Debashish Nayak"),
-        BiblifyBooks(id = "4", title = "Valorant...", author = "Sohan Saha"),
-        BiblifyBooks(id = "5", title = "Rich Dad, Richer Dad", author = "Ankit Raj"),
-        BiblifyBooks(id = "6", title = "Dihadi Majdoor", author = "Average Bihari Boy")
-    )
 
+    var listOfBooks = emptyList<BiblifyBooks>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
-    val email = FirebaseAuth.getInstance().currentUser?.email
-    val currentUserName = if (!email.isNullOrEmpty()) {
-        email.split("@")[0]
-    }else {
-        "N/A"
-    }
-    Column (
-        verticalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier
-            .padding(2.dp)
-    ) {
-        Row (
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            TitleSection(
-                label = "Your Reading Activity",
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 5.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .weight(.3f),
-            ) {
-               Column (
-                   horizontalAlignment = Alignment.CenterHorizontally,
-                   modifier = Modifier
-               ) {
-                   Image(
-                       painter = painterResource(R.drawable.userpfp),
-                       contentDescription = "User Profile Picture",
-                       contentScale = ContentScale.Crop,
-                       modifier = Modifier
-                           .aspectRatio(1f)
-                           .scale(0.7f)
-                           .clip(CircleShape)
-                           .clickable {
-                               navController.navigate(BiblifyScreens.StatsScreen.name)
-                           }
-                   )
-                   Text (
-                       text = currentUserName.capitalize(locale = Locale.current),
-                       fontSize = 15.sp,
-                       fontWeight = FontWeight.Bold,
-                       maxLines = 1,
-                       overflow = TextOverflow.Clip
-                   )
-               }
-            }
+    if (!viewModel.data.value.data.isNullOrEmpty()) {
+            listOfBooks = viewModel.data.value.data!!.toList().filter { biblifyBook->
+                biblifyBook.userID == currentUser?.uid.toString()
         }
-        ListCard()
-        CurrentActivity(books = listOf(), navController = navController)
-        TitleSection(label = "Reading List")
-        BookListArea(listOfBooks = listOfBooks, navController = navController)
-
+        Column (
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = modifier
+                .padding(2.dp)
+        ) {
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                TitleSection(
+                    isTopSection = true,
+                    label = "Your Reading Activity",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 5.dp)
+                ) {
+                    navController.navigate(BiblifyScreens.StatsScreen.name)
+                }
+            }
+            BookListArea(listOfBooks = listOfBooks, navController = navController)
+            CurrentActivity(books = listOf(), navController = navController)
+            TitleSection(label = "Reading List", modifier = Modifier.padding(5.dp))
+            BookListArea(listOfBooks = listOfBooks, navController = navController)
+        }
+    }
+    else {
+        Column (
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+        ){
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -164,7 +134,5 @@ fun CurrentActivity(
 @Composable
 fun Preview() {
     BiblifyTheme {
-        val navController = rememberNavController()
-        HomeContent(navController = navController)
     }
 }

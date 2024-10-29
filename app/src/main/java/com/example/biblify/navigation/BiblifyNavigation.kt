@@ -1,5 +1,6 @@
 package com.example.biblify.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -9,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.biblify.screens.detail.DetailsScreen
 import com.example.biblify.screens.home.HomeScreen
+import com.example.biblify.screens.home.HomeScreenViewModel
 import com.example.biblify.screens.login.LoginScreen
 import com.example.biblify.screens.register.CreateAccountScreen
 import com.example.biblify.screens.search.SearchScreen
@@ -28,11 +30,12 @@ fun BiblifyNavigation() {
             CreateAccountScreen(navController = navController)
         }
         composable(BiblifyScreens.HomeScreen.name) {
-            HomeScreen(navController = navController)
+            val viewModel = hiltViewModel<HomeScreenViewModel>()
+            HomeScreen(navController, viewModel)
         }
-        val route = BiblifyScreens.DetailsScreen.name
+        val detailsRoute = BiblifyScreens.DetailsScreen.name
         composable(
-            route = "$route/{bookID}",
+            route = "$detailsRoute/{bookID}",
             arguments = listOf(
                 navArgument(name = "bookID") {
                     type = NavType.StringType
@@ -54,8 +57,19 @@ fun BiblifyNavigation() {
         composable(BiblifyScreens.StatsScreen.name) {
             StatsScreen(navController = navController)
         }
-        composable(BiblifyScreens.UpdateScreen.name) {
-            UpdateScreen(navController = navController)
+        val updateRoute = BiblifyScreens.UpdateScreen.name
+        composable(
+            route = "$updateRoute/{bookItemID}",
+            arguments = listOf(
+                navArgument(
+                    name = "bookItemID") {
+                    type = NavType.StringType
+                }
+            )
+        ) {navBackStackEntry->
+            navBackStackEntry.arguments?.getString("bookItemID").let { bookItemID->
+                UpdateScreen(navController, bookItemID.toString())
+            }
         }
     }
 }

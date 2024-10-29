@@ -33,20 +33,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
 import com.example.biblify.R
 import com.example.biblify.component.BiblifyTopBar
 import com.example.biblify.data.Resource
 import com.example.biblify.model.BiblifyBooks
 import com.example.biblify.model.Item
-import com.example.biblify.ui.theme.BiblifyTheme
+import com.example.biblify.utils.LoadImageWithGlide
 import com.example.biblify.utils.customFonts
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -63,12 +60,15 @@ fun DetailsScreen(
     val googleBookID = bookInfo.data?.id
 
     if (bookInfo.data == null) {
+        Log.d("DETAILS", "BOOK INFO: NULL!")
         LinearProgressIndicator (
             color = ProgressIndicatorDefaults.circularColor,
             trackColor = ProgressIndicatorDefaults.linearTrackColor
         )
     }
-    else {Scaffold (
+    else {
+        Log.d("DETAILS", "Info Retrieved!: ${bookInfo.data}")
+        Scaffold (
         topBar = {
             BiblifyTopBar(
                 title = "",
@@ -136,23 +136,18 @@ fun DetailsScreen(
                             defaultElevation = 10.dp
                         )
                     ) {
-                        /*Image (
-                            painter = painterResource(R.drawable.dummybookcover),
-                            contentDescription = "Book Image",
+                        val imageURL = bookInfo.data.volumeInfo.imageLinks.smallThumbnail
+                        LoadImageWithGlide (
+                            imageUrl = imageURL,
                             modifier = Modifier
                                 .padding(7.dp)
                                 .fillMaxSize()
-                        )*/
-                        val imageURL = bookInfo.data?.volumeInfo?.imageLinks?.smallThumbnail
-                        AsyncImage (
-                            model = imageURL,
-                            contentDescription = null,
                         )
                     }
                 }
                 Spacer(modifier = Modifier.padding(vertical = 30.dp))
                 Text(
-                    text = bookInfo.data?.volumeInfo?.title.toString(),
+                    text = bookInfo.data.volumeInfo.title.toString(),
                     fontSize = 35.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = customFonts(GoogleFont("Teko")),
@@ -161,7 +156,7 @@ fun DetailsScreen(
                         .padding(start = 15.dp, end = 15.dp )
                 )
                 Text(
-                    text = bookInfo.data?.volumeInfo?.authors.toString(),
+                    text = bookInfo.data.volumeInfo.authors.toString(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = customFonts(GoogleFont("Anton")),
@@ -227,14 +222,8 @@ fun saveToFireStore(
                         Log.w("Error", "Saving to Firebase: Error updating doc")
                     }
             }
-    }else {}
-}
-
-@Preview
-@Composable
-fun PreviewThis() {
-    BiblifyTheme {
-        val navController = rememberNavController()
-        //DetailsScreen(navController = navController)
+    } else {
+        //
     }
 }
+

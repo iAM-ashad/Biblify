@@ -23,7 +23,7 @@ class SearchViewModel @Inject constructor(private val repository: BooksRepositor
         loadBooks()
     }
 
-    fun loadBooks() {
+    private fun loadBooks() {
         searchBooks("android")
     }
 

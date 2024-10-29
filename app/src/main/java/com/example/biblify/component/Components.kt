@@ -1,6 +1,12 @@
 package com.example.biblify.component
 
+import android.content.Context
 import android.util.Log
+import android.view.MotionEvent
+import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -9,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,16 +51,21 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -78,8 +88,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.biblify.R
 import com.example.biblify.model.BiblifyBooks
+import com.example.biblify.navigation.BiblifyScreens
 import com.example.biblify.screens.search.SearchViewModel
 import com.example.biblify.ui.theme.BiblifyTheme
+import com.example.biblify.utils.LoadImageWithGlide
 import com.example.biblify.utils.customFonts
 
 @Composable
@@ -204,7 +216,7 @@ fun LoginRegisterButton(
 
 @Composable
 fun ListCard(
-    book: BiblifyBooks = BiblifyBooks("1", "Winners", "Ashad Ansari", "Amazing"),
+    book: BiblifyBooks,
     onPressDetails: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -226,8 +238,7 @@ fun ListCard(
             .height(242.dp)
             .width(202.dp)
             .clickable {
-                onPressDetails.invoke(book.title.toString())
-                Log.d("BOOK CLICKED", "BOOK: ${book.title.toString()}")
+                onPressDetails.invoke(book.googleBookID.toString())
             }
     ) {
         Column (
@@ -248,14 +259,10 @@ fun ListCard(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        Image(
-                            //painter = rememberAsyncImagePainter(model = ""),
-                            painter = painterResource(id = R.drawable.dummybookcover),
-                            contentDescription = "Cover Page",
-                            contentScale = ContentScale.FillBounds,
+                        LoadImageWithGlide (
+                            imageUrl = book.photoURL.toString(),
                             modifier = Modifier
                                 .fillMaxSize()
-
                         )
                     }
                 }
@@ -270,7 +277,9 @@ fun ListCard(
                         modifier = Modifier
                             .padding(start = 4.dp)
                     )
-                    BookRating()
+                    BookRating(
+                        rating = book.rating!!
+                    )
                 }
             }
             Column (
@@ -280,15 +289,17 @@ fun ListCard(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Subtle Art of Not Giving a Fuck",
+                    text = book.title.toString(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, top = 4.dp)
                 )
                 Text(
-                    text = "[Mark Manson]",
+                    text = book.author.toString(),
                     fontStyle = FontStyle.Italic,
                     fontSize = 10.sp,
+                    maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp)
                 )
                 Card (
@@ -360,32 +371,29 @@ fun BiblifyTopBar(
     TopAppBar(
         title = {
             Row (
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier
+                    .fillMaxWidth()
             ) {
                 if(showProfile) {
-                    Image(
-                        painter = painterResource(R.drawable.appicon),
-                        contentDescription = "User Profile Picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = modifier
-                            .scale(.8f)
-                            .aspectRatio(1f)
-                            .clip(CircleShape)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.appicon),
+                            contentDescription = "App Icon",
+                            contentScale = ContentScale.Crop,
+                            modifier = modifier
+                                //.scale(.8f)
+                                //.aspectRatio(1f)
+                                //.clip(CircleShape)
 
-                    )
+                        )
+                    }
                 }
-                Text(
-                    text = title,
-                    color = Color(226,180,117),
-                    style = TextStyle(
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = customFonts(GoogleFont("Great Vibes"))
-                    ),
-                    modifier = Modifier
-                        .padding(10.dp)
-                )
             }
         },
         navigationIcon = {
@@ -414,27 +422,45 @@ fun BiblifyTopBar(
                     )
                 }
             }
-        }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
     )
 }
 
 @Composable
 fun TitleSection(
+    isTopSection: Boolean = false,
     modifier: Modifier = Modifier,
-    label: String
+    label: String,
+    onPfpClicked: () -> Unit = {}
 ) {
     Surface (
         modifier = modifier
             .padding(start = 5.dp, top = 1.dp)
     ) {
-        Column (
-            verticalArrangement = Arrangement.Center
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = label,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
+                fontFamily = customFonts(GoogleFont("DM Serif Text")),
                 textAlign = TextAlign.Left
             )
+            if (isTopSection) {
+                Image(
+                    painter = painterResource(R.drawable.userpfp),
+                    contentDescription = "User Account",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(end = 10.dp)
+                        .clickable {
+                            onPfpClicked.invoke()
+                        }
+                )
+            }
         }
     }
 }
@@ -445,7 +471,8 @@ fun BookListArea (
     navController: NavController
 ) {
     HorizontalScrollableComponent(listOfBooks){
-        Log.d("CLICKED", "Clicked: $it")
+        Log.d("BLA", "Clicked On: $it")
+        navController.navigate(BiblifyScreens.UpdateScreen.name+"/$it")
     }
 }
 
@@ -465,6 +492,7 @@ fun HorizontalScrollableComponent(
         for (book in listOfBooks) {
             ListCard(book) {
                 onCardPressed(it)
+                Log.d("HSC", "Clicked On: $it")
             }
         }
     }
@@ -577,6 +605,114 @@ fun SearchTextField(
             .height(65.dp)
     )
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun RatingBar(
+    modifier: Modifier = Modifier,
+    rating: Int,
+    onPressRating: (Int) -> Unit
+) {
+    var ratingState by remember {
+        mutableIntStateOf(rating)
+    }
+
+    var selected by remember {
+        mutableStateOf(false)
+    }
+    val size by animateDpAsState(
+        targetValue = if (selected) 42.dp else 34.dp,
+        spring(Spring.DampingRatioMediumBouncy), label = ""
+    )
+
+    Row(
+        modifier = Modifier.width(280.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        for (i in 1..5) {
+            Icon(
+                painter = painterResource(id = R.drawable.star),
+                contentDescription = "star",
+                modifier = modifier
+                    .width(size)
+                    .height(size)
+                    .pointerInteropFilter {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                selected = true
+                                onPressRating(i)
+                                ratingState = i
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                selected = false
+                            }
+                        }
+                        true
+                    },
+                tint = if (i <= ratingState) Color(0xFFFFD700) else Color(0xFFA2ADB1)
+            )
+        }
+    }
+}
+@Preview
+@Composable
+fun RoundedButton(
+    label: String = "Reading",
+    radius: Int = 29,
+    onPress: () -> Unit = {}) {
+    Surface(modifier = Modifier.clip(RoundedCornerShape(
+        bottomEndPercent = radius,
+        topStartPercent = radius)),
+        color = Color(0xFF92CBDF)) {
+
+        Column(modifier = Modifier
+            .width(90.dp)
+            .heightIn(40.dp)
+            .clickable { onPress.invoke() },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = label, style = TextStyle(color = Color.White,
+                fontSize = 15.sp),)
+        }
+    }
+}
+
+@Composable
+fun InputField(
+    modifier: Modifier = Modifier,
+    valueState: MutableState<String>,
+    labelId: String,
+    enabled: Boolean,
+    isSingleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Next,
+    onAction: KeyboardActions = KeyboardActions.Default
+) {
+
+    OutlinedTextField(value = valueState.value,
+        onValueChange = { valueState.value = it},
+        label = { Text(text = labelId)},
+        singleLine = isSingleLine,
+        textStyle = TextStyle(
+            fontSize = 18.sp,
+            color = Color.Transparent
+        ),
+        modifier = modifier
+            .padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
+            .fillMaxWidth(),
+        enabled = enabled,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardActions = onAction)
+
+
+}
+
+fun showToast(context: Context, msg: String) {
+    Toast.makeText(context, msg, Toast.LENGTH_LONG)
+        .show()
+}
+
 
 @Preview(showBackground = true)
 @Composable

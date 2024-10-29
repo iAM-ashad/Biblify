@@ -1,7 +1,6 @@
 package com.example.biblify.screens.search
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,16 +17,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,14 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.example.biblify.component.BiblifyTopBar
 import com.example.biblify.component.SearchBar
 import com.example.biblify.model.Item
 import com.example.biblify.navigation.BiblifyScreens
 import com.example.biblify.ui.theme.BiblifyTheme
+import com.example.biblify.utils.LoadImageWithGlide
 
 @Composable
 fun SearchScreen(
@@ -134,44 +128,13 @@ fun SearchItem (
             } else {
                 book.volumeInfo.imageLinks.smallThumbnail
             }
-            Log.d("Image URL", "ImageURL: $imageURL")
-            /*AsyncImage (
-                model = imageURL,
-                contentDescription = null,
-                contentScale = ContentScale.Inside,
-                clipToBounds = true,
-                error = painterResource(id = R.drawable.dummybookcover),
-                modifier = Modifier
-                    .weight(0.3f)
-                    .fillMaxSize()
-           )*/
-            val painter = rememberAsyncImagePainter(model = imageURL)
-            val painterState = painter.state.collectAsState()
-            Image(
-                painter = painter,
-                contentDescription = null,
-                contentScale = ContentScale.Inside,
+            LoadImageWithGlide(
+                imageUrl = imageURL,
                 modifier = Modifier
                     .weight(0.3f)
                     .fillMaxSize()
             )
-
-            when (val state = painterState.value) {
-                is AsyncImagePainter.State.Loading -> {
-                    CircularProgressIndicator()
-                    Log.d("IMAGE_STATUS", "Image is loading...")
-                }
-                is AsyncImagePainter.State.Error -> {
-                    Log.e("IMAGE_STATUS", "Failed to load image.")
-                }
-                is AsyncImagePainter.State.Success -> {
-                    Log.d("IMAGE_STATUS", "Image loaded successfully!")
-                }
-                else -> Unit
-            }
-
             Column (
-                //verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .weight(0.7f)
@@ -221,9 +184,5 @@ fun SearchItem (
 @Composable
 fun PreviewSearch() {
     BiblifyTheme {
-        val viewModel = hiltViewModel<SearchViewModel>()
-        val navController = rememberNavController()
-        val bookList = viewModel.list
-        SearchItem(book = bookList[0], navController = navController)
     }
 }

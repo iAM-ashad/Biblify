@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.libs
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -65,6 +67,7 @@ dependencies {
     // Dagger-hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.runtime.livedata)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.fragment)
     implementation(libs.androidx.hilt.navigation)
@@ -101,6 +104,16 @@ dependencies {
 
     // Animations
     implementation (libs.androidx.animation)
+
+    // Misc
+    implementation (libs.androidx.lifecycle.livedata.ktx) // or the latest version
+    implementation (libs.androidx.lifecycle.runtime.compose) // or the latest version
+
+    // Glide
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
+    // Material Icons
+    implementation(libs.material3)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
