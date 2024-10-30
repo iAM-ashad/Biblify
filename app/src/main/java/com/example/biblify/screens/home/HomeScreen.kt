@@ -101,9 +101,17 @@ fun HomeContent(
                     navController.navigate(BiblifyScreens.StatsScreen.name)
                 }
             }
-            CurrentActivity(books = listOfBooks, navController = navController)
+            CurrentActivity(
+                books = listOfBooks,
+                navController = navController,
+                isReading = true
+            )
             TitleSection(label = "Reading List", modifier = Modifier.padding(5.dp))
-            BookListArea(listOfBooks = listOfBooks, navController = navController)
+            BookListArea(
+                listOfBooks = listOfBooks,
+                navController = navController,
+                isReading = false
+            )
         }
     }
     else {
@@ -122,6 +130,7 @@ fun HomeContent(
 
 @Composable
 fun CurrentActivity(
+    isReading: Boolean = false,
     books: List<BiblifyBooks>,
     navController: NavController
 ) {
@@ -129,7 +138,8 @@ fun CurrentActivity(
         book.startedReading != null && book.finishedReading != true
     }
     HorizontalScrollableComponent(
-        listOfBooks = readingNowList
+        listOfBooks = readingNowList,
+        isReading = isReading
     ) {
         navController.navigate(BiblifyScreens.UpdateScreen.name + "/$it")
     }

@@ -1,5 +1,6 @@
 package com.example.biblify.screens.detail
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -103,7 +104,7 @@ fun DetailsScreen(
                         userID = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
                     )
-                    saveToFireStore(book, navController)
+                    saveToFireStore(context = context, book, navController)
                 }) {
                 Icon (
                     painter = painterResource(R.drawable.bookmarksave),
@@ -207,6 +208,7 @@ fun DetailsScreen(
 }
 
 fun saveToFireStore(
+    context: Context,
     book: BiblifyBooks,
     navController: NavController
 ) {
@@ -221,6 +223,7 @@ fun saveToFireStore(
                     .addOnCompleteListener {task->
                         if (task.isSuccessful) {
                             navController.navigate(BiblifyScreens.HomeScreen.name)
+                            showToast(context, "Book saved successfully!")
                         }
                     }
                     .addOnFailureListener {

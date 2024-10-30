@@ -118,7 +118,7 @@ fun UpdateScreenTopBar(
                 navController.popBackStack()
             },
             modifier = Modifier
-                .padding(top = 20.dp, start = 10.dp)
+                .padding(top = 30.dp, start = 10.dp)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -342,7 +342,7 @@ fun ThoughtField(
         ),
         keyboardActions = onAction,
         modifier = Modifier
-            .height(300.dp)
+            .height(250.dp)
             .fillMaxWidth()
             .padding(25.dp)
 
@@ -355,15 +355,17 @@ fun StartFinishRow (
     onReadClick: ()-> Unit,
     book: BiblifyBooks
 ) {
+    val context = LocalContext.current
     Row (
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .padding(bottom = 20.dp)
+            .padding(bottom = 10.dp)
     ){
         TextButton(
-            onClick =
-                onStartClick
-            ,
+            onClick = {
+                onStartClick.invoke()
+                showToast(context, "Click on Update to Start Reading!")
+            },
             enabled = book.startedReading == null
         ) {
             if (book.startedReading == null){
@@ -381,9 +383,10 @@ fun StartFinishRow (
             }
         }
         TextButton(
-            onClick =
-               onReadClick
-            ,
+            onClick = {
+                onReadClick.invoke()
+                showToast(context, "Click on Update to Mark as Read!")
+            },
             enabled = book.finishedReading == null
         ) {
             if (book.finishedReading == null){
@@ -410,7 +413,7 @@ fun UpdateDeleteButtonRow(
     Row (
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .padding(bottom = 20.dp)
+            .padding(bottom = 10.dp)
     ) {
         Button(
             onClick = onUpdateClicked,

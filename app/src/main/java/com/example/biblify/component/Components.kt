@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -219,6 +220,7 @@ fun LoginRegisterButton(
 
 @Composable
 fun ListCard(
+    isReading: Boolean = false,
     book: BiblifyBooks,
     onPressDetails: (String) -> Unit = {}
 ) {
@@ -316,7 +318,11 @@ fun ListCard(
                         defaultElevation = 20.dp
                     ),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(188,140,100),
+                        containerColor = if (isReading){
+                            Color(156, 39, 176, 255)
+                        }else{
+                            Color(63, 81, 181, 255)
+                        },
                         contentColor = Color(236,255,255)
                     )
                 ) {
@@ -326,11 +332,19 @@ fun ListCard(
                         modifier = Modifier
                             .fillMaxSize()
                     ){
-                        Text(
-                            text = "Reading",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (isReading) {
+                            Text(
+                                text = "Reading",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            Text(
+                                text = "Bucket",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -390,9 +404,9 @@ fun BiblifyTopBar(
                             contentDescription = "App Icon",
                             contentScale = ContentScale.Crop,
                             modifier = modifier
-                                //.scale(.8f)
-                                //.aspectRatio(1f)
-                                //.clip(CircleShape)
+                                .scale(.9f)
+                                .aspectRatio(1f)
+                                .clip(CircleShape)
 
                         )
                     }
@@ -457,7 +471,7 @@ fun TitleSection(
                     painter = painterResource(R.drawable.userpfp),
                     contentDescription = "User Account",
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp)
                         .padding(end = 10.dp)
                         .clickable {
                             onPfpClicked.invoke()
@@ -470,19 +484,24 @@ fun TitleSection(
 
 @Composable
 fun BookListArea (
+    isReading: Boolean = false,
     listOfBooks: List<BiblifyBooks>,
     navController: NavController
 ) {
     val addedBooks = listOfBooks.filter { book->
         book.startedReading == null && book.finishedReading == null
     }
-    HorizontalScrollableComponent(addedBooks){
+    HorizontalScrollableComponent(
+        listOfBooks = addedBooks,
+        isReading = isReading
+    ){
         navController.navigate(BiblifyScreens.UpdateScreen.name+"/$it")
     }
 }
 
 @Composable
 fun HorizontalScrollableComponent(
+    isReading: Boolean = false,
     listOfBooks: List<BiblifyBooks>,
     viewModel: HomeScreenViewModel = hiltViewModel(),
     onCardPressed: (String) -> Unit = {}
@@ -502,7 +521,10 @@ fun HorizontalScrollableComponent(
                 Text(text = "NO BOOKS FOUND!")
             }else {
                 for (book in listOfBooks) {
-                    ListCard(book) {
+                    ListCard(
+                        book = book,
+                        isReading = isReading
+                    ) {
                         onCardPressed(book.googleBookID.toString())
                     }
                 }
