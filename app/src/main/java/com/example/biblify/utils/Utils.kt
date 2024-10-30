@@ -5,10 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.bumptech.glide.Glide
+import com.google.firebase.Timestamp
 import java.text.DateFormat
 
-fun formatDate(timestamp: com.google.firebase.Timestamp): String {
-    return DateFormat.getDateInstance().format(timestamp.toDate()).toString().split(",")[0] // March 12
+fun formatDate(timestamp: Timestamp?): String {
+    return if (timestamp != null) {
+        DateFormat.getDateInstance().format(timestamp.toDate()).toString().split(",")[0]
+    } else {
+        "Today"
+    }
 }
 
 @Composable

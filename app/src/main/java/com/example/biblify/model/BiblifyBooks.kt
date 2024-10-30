@@ -21,12 +21,18 @@ data class BiblifyBooks (
     @get:PropertyName("page_count")
     @set:PropertyName("page_count")
     var pageCount: String? = null,
+    @get:PropertyName("started_reading_at")
+    @set:PropertyName("started_reading_at")
+    var startedReadingAt: Timestamp? = null,
+    @get:PropertyName("finished_reading_at")
+    @set:PropertyName("finished_reading_at")
+    var finishedReadingAt: Timestamp? = null,
     @get:PropertyName("started_reading")
     @set:PropertyName("started_reading")
-    var startedReading: Timestamp? = null,
+    var startedReading: Boolean? = null,
     @get:PropertyName("finished_reading")
     @set:PropertyName("finished_reading")
-    var finishedReading: Timestamp? = null,
+    var finishedReading: Boolean? = null,
     @get:PropertyName("user_id")
     @set:PropertyName("user_id")
     var userID: String? = null,

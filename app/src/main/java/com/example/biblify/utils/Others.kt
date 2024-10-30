@@ -1,3 +1,5 @@
+/*package com.example.biblify.utils
+
 package com.example.biblify.screens.update
 import android.util.Log
 import android.widget.ImageView
@@ -23,10 +25,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -37,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.biblify.component.BiblifyTopBar
 import com.example.biblify.component.RatingBar
 import com.example.biblify.component.showToast
 import com.example.biblify.model.BiblifyBooks
@@ -70,64 +71,37 @@ fun UpdateScreen(
     }
     val bookInfo = viewModel.singleBookData.value
 
-    Box (
-        modifier = Modifier
-            .fillMaxSize()
-    ){
-        if (!bookInfo.loading!!) {
-            val imgUrl = bookInfo.data!!.photoURL.toString()
-            LoadImageWithGlide(
-                imageScale = ImageView.ScaleType.FIT_XY,
-                imageUrl = imgUrl,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(20.dp)
+    Scaffold(
+        topBar = {
+            BiblifyTopBar(
+                title = "Update Screen",
+                navController = navController,
+                showProfile = false,
+                navIcon = Icons.AutoMirrored.Default.ArrowBack,
+                navIconPressed = {
+                    navController.popBackStack()
+                }
             )
-            Column (
+        }
+    ) { contentPadding ->
+        if (!bookInfo.loading!!) {
+            Box(
                 modifier = Modifier
+                    .padding(contentPadding)
                     .fillMaxSize()
+                    .padding(top = 20.dp)
             ) {
-                UpdateScreenTopBar(
-                    navController
+                UpdateScreenContent(
+                    navController = navController,
+                    bookInfo = bookInfo.data!!
                 )
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 100.dp)
-                            .fillMaxSize()
-                    ) {
-                        UpdateScreenContent(
-                            navController = navController,
-                            bookInfo = bookInfo.data!!
-                        )
-                    }
             }
         } else {
             LinearProgressIndicator()
         }
     }
 }
-@Composable
-fun UpdateScreenTopBar(
-    navController: NavController
-) {
-    Box (
-        contentAlignment = Alignment.TopStart,
-    ){
-        IconButton(
-            onClick = {
-                navController.popBackStack()
-            },
-            modifier = Modifier
-                .padding(top = 20.dp, start = 10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = "Back Arrow",
-                tint = Color.DarkGray
-            )
-        }
-    }
-}
+
 @Composable
 fun UpdateScreenContent(
     navController: NavController,
@@ -152,27 +126,35 @@ fun BookSection(
         mutableIntStateOf(book.rating!!)
     }
     val isFinishedReading = remember {
-        mutableStateOf(book.finishedReading)
+        mutableStateOf(false)
     }
     val notesText = remember {
         mutableStateOf("")
     }
     val isStartedReading = remember {
-       mutableStateOf(book.startedReading)
+        mutableStateOf(false)
     }
-
+    val isStartedTimeStamp = remember {
+        mutableStateOf(book.finishedReading)
+    }
+    val isFinishedTimeStamp = remember {
+        mutableStateOf(book.finishedReading)
+    }
     val changedNotes = book.notes != notesText.value
     val changedRating = book.rating?.toInt() != ratingVal.intValue
-    val isFinishedTimeStamp = if (isFinishedReading.value == true) Timestamp.now() else book.finishedReading
-    val isStartedTimeStamp = if (isStartedReading.value == true) Timestamp.now() else book.startedReading
+    //val isFinishedTimeStamp = if (isFinishedReading.value) Timestamp.now() else book.finishedReading
+    //val isStartedTimeStamp = if (isStartedReading.value) Timestamp.now() else book.startedReading
+    if (isFinishedReading.value && isFinishedTimeStamp.value == null) {
+        isFinishedTimeStamp.value = Timestamp.now()
+    }
+    if (isStartedReading.value && isStartedTimeStamp.value == null) {
+        isStartedTimeStamp.value = Timestamp.now()
+    }
 
-    val bookUpdate = changedNotes || changedRating || isStartedReading.value == true || isFinishedReading.value == true
-
+    val bookUpdate = changedNotes || changedRating || isStartedReading.value || isFinishedReading.value
     val bookToUpdate = hashMapOf(
-        "finished_reading_at" to isFinishedTimeStamp,
-        "started_reading_at" to isStartedTimeStamp,
-        "started_reading" to isStartedReading.value,
-        "finished_reading" to isFinishedReading.value,
+        "finished_reading_at" to isFinishedTimeStamp.value,
+        "started_reading_at" to isStartedTimeStamp.value,
         "rating" to ratingVal.intValue,
         "notes" to notesText.value).toMap()
     Box (
@@ -185,10 +167,7 @@ fun BookSection(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent),
-            shape = RoundedCornerShape(
-                topStart = 50.dp,
-                topEnd = 50.dp
-            ),
+            shape = RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
@@ -241,28 +220,27 @@ fun BookSection(
                 ) {thoughts->
                     notesText.value = thoughts
                 }
-                StartFinishRow(
-                    book = book,
-                    onStartClick = {
-                        isStartedReading.value = true
-                    },
-                    onReadClick = {
-                        isFinishedReading.value = true
-                    }
+                StartedFinishedRow(
+                    isStartedTimeStamp = isStartedTimeStamp.value,
+                    isStartedReading = isStartedReading,
+                    isFinishedTimeStamp = isFinishedTimeStamp.value,
+                    isFinishedReading = isFinishedReading,
+                    book = book
                 )
                 UpdateDeleteButtonRow(
                     onUpdateClicked = {
                         if (bookUpdate) {
-                        FirebaseFirestore.getInstance()
-                        .collection("books")
-                        .document(book.id!!)
-                        .update(bookToUpdate)
-                        .addOnCompleteListener {
-                            showToast(context, "Book Updated Successfully!")
-                            navController.navigate(BiblifyScreens.HomeScreen.name)
-                        }.addOnFailureListener{
-                            Log.w("Error", "Error updating document" , it)
-                        } }
+                            FirebaseFirestore.getInstance()
+                                .collection("books")
+                                .document(book.id!!)
+                                .update(bookToUpdate)
+                                .addOnCompleteListener {
+                                    showToast(context, "Book Updated Successfully!")
+                                    navController.navigate(BiblifyScreens.HomeScreen.name)
+                                }.addOnFailureListener{
+                                    Log.w("Error", "Error updating document" , it)
+                                }
+                        }
                     },
                     onDeleteClicked = {
                         FirebaseFirestore.getInstance()
@@ -296,7 +274,6 @@ fun BookSection(
         }
     }
 }
-
 @Composable
 fun ThoughtBox(
     thoughts: String = "Great Book",
@@ -350,58 +327,64 @@ fun ThoughtField(
 }
 
 @Composable
-fun StartFinishRow (
-    onStartClick: ()-> Unit,
-    onReadClick: ()-> Unit,
+fun StartedFinishedRow(
+    isStartedTimeStamp: Timestamp? = null,
+    isFinishedTimeStamp: Timestamp? = null,
+    isStartedReading: MutableState<Boolean>,
+    isFinishedReading: MutableState<Boolean>,
     book: BiblifyBooks
 ) {
     Row (
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .padding(bottom = 20.dp)
     ){
         TextButton(
-            onClick =
-                onStartClick
-            ,
+            onClick = {
+                isStartedReading.value = true
+            },
             enabled = book.startedReading == null
         ) {
-            if (book.startedReading == null){
+            if (isStartedTimeStamp == null) {
+                if (!isStartedReading.value) {
+                    Text(
+                        text = "Start Reading",
+                        color = Color(255, 193, 7, 255),
+                        modifier = Modifier
+                    )
+                }
+            } else {
                 Text(
-                    text = "Start Reading",
-                    fontSize = 20.sp,
-                    color = Color(255, 193, 7, 255)
-                )
-            }else {
-                Text(
-                    text = "Started On: ${formatDate(book.startedReadingAt)}",
-                    fontSize = 20.sp,
-                    color = Color.DarkGray
-                )
-            }
+                    text = "Started On: ${formatDate(isStartedTimeStamp)}",
+                    color = Color.Black,
+                    modifier = Modifier
+                ) }
         }
         TextButton(
-            onClick =
-               onReadClick
-            ,
+            onClick = {
+                isFinishedReading.value = true
+                book.finishedReading = Timestamp.now()
+            },
             enabled = book.finishedReading == null
         ) {
-            if (book.finishedReading == null){
+            if (isFinishedTimeStamp == null) {
+                if (!isFinishedReading.value) {
+                    Text(
+                        text = "Mark as Read",
+                        color = Color(255, 193, 7, 255),
+                        modifier = Modifier
+                    )
+                }
+            } else {
                 Text(
-                    text = "Mark as Read",
-                    fontSize = 20.sp,
-                    color = Color(255, 193, 7, 255)
-                )
-            }else {
-                Text(
-                    text = "Finished On: ${formatDate(book.finishedReadingAt)}",
-                    fontSize = 20.sp,
-                    color = Color.DarkGray
-                )
-            }
+                    text = "Finished On: ${formatDate(isFinishedTimeStamp)}",
+                    color = Color.Black,
+                    modifier = Modifier
+                ) }
         }
+
     }
 }
+
 @Composable
 fun UpdateDeleteButtonRow(
     onUpdateClicked: ()-> Unit,
@@ -438,4 +421,4 @@ fun UpdateDeleteButtonRow(
             )
         }
     }
-}
+}*/

@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,6 +22,7 @@ import com.example.biblify.R
 import com.example.biblify.component.BiblifyFAB
 import com.example.biblify.component.BiblifyTopBar
 import com.example.biblify.component.BookListArea
+import com.example.biblify.component.HorizontalScrollableComponent
 import com.example.biblify.component.TitleSection
 import com.example.biblify.model.BiblifyBooks
 import com.example.biblify.navigation.BiblifyScreens
@@ -102,8 +101,7 @@ fun HomeContent(
                     navController.navigate(BiblifyScreens.StatsScreen.name)
                 }
             }
-            BookListArea(listOfBooks = listOfBooks, navController = navController)
-            CurrentActivity(books = listOf(), navController = navController)
+            CurrentActivity(books = listOfBooks, navController = navController)
             TitleSection(label = "Reading List", modifier = Modifier.padding(5.dp))
             BookListArea(listOfBooks = listOfBooks, navController = navController)
         }
@@ -127,7 +125,14 @@ fun CurrentActivity(
     books: List<BiblifyBooks>,
     navController: NavController
 ) {
-
+    val readingNowList = books.filter { book->
+        book.startedReading != null && book.finishedReading != true
+    }
+    HorizontalScrollableComponent(
+        listOfBooks = readingNowList
+    ) {
+        navController.navigate(BiblifyScreens.UpdateScreen.name + "/$it")
+    }
 }
 
 @Preview(showBackground = true)

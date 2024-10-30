@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
@@ -40,9 +41,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.biblify.R
 import com.example.biblify.component.BiblifyTopBar
+import com.example.biblify.component.showToast
 import com.example.biblify.data.Resource
 import com.example.biblify.model.BiblifyBooks
 import com.example.biblify.model.Item
+import com.example.biblify.navigation.BiblifyScreens
+import com.example.biblify.screens.home.HomeScreen
 import com.example.biblify.utils.LoadImageWithGlide
 import com.example.biblify.utils.customFonts
 import com.google.firebase.auth.FirebaseAuth
@@ -54,6 +58,7 @@ fun DetailsScreen(
     navController: NavController,
     viewModel: DetailScreenViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val bookInfo = produceState<Resource<Item>>(initialValue = Resource.Loading()) {
         value = viewModel.getBookInfo(bookID)
     }.value
@@ -215,7 +220,7 @@ fun saveToFireStore(
                     .update(hashMapOf("id" to docID) as Map<String, Any>)
                     .addOnCompleteListener {task->
                         if (task.isSuccessful) {
-                            navController.popBackStack()
+                            navController.navigate(BiblifyScreens.HomeScreen.name)
                         }
                     }
                     .addOnFailureListener {
