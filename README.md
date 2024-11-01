@@ -1,6 +1,6 @@
-Bookshelf App 📚
+Biblify 📚
 
-Welcome to the Bookshelf App! This application enables users to explore, search, and keep track of their reading journey by integrating with the Google Books API. Users can save books to their personal library, mark reading progress, and view insightful statistics about their reading habits.
+Welcome to the Bookshelf App "Biblify"! This application enables users to explore, search, and keep track of their reading journey by integrating with the Google Books API. Users can save books to their personal library, mark reading progress, and view insightful statistics about their reading habits.
 
 Features:
 1. Book Search: Search for books directly from the Google Books API, providing access to a wide range of book titles, authors, and descriptions.
