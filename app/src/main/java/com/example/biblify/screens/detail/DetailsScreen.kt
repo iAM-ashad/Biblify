@@ -47,7 +47,6 @@ import com.example.biblify.data.Resource
 import com.example.biblify.model.BiblifyBooks
 import com.example.biblify.model.Item
 import com.example.biblify.navigation.BiblifyScreens
-import com.example.biblify.screens.home.HomeScreen
 import com.example.biblify.utils.LoadImageWithGlide
 import com.example.biblify.utils.customFonts
 import com.google.firebase.auth.FirebaseAuth
@@ -135,8 +134,7 @@ fun DetailsScreen(
                             .width(150.dp)
                             .padding(end = 10.dp),
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Transparent
+                        colors = CardDefaults.cardColors(containerColor = Color.Transparent
                         ),
                         elevation = CardDefaults.cardElevation(
                             defaultElevation = 10.dp
@@ -203,8 +201,8 @@ fun DetailsScreen(
                 }
             }
         }
-    }}
-
+        }
+    }
 }
 
 fun saveToFireStore(

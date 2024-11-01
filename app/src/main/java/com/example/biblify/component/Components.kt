@@ -1,7 +1,6 @@
 package com.example.biblify.component
 
 import android.content.Context
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.compose.animation.core.Spring
